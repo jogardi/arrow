@@ -416,9 +416,7 @@ func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []in
 		nrows = columns[0].Len()
 	}
 
-	fmt.Println("before new table")
 	rr := array.NewTable(sc, columns, int64(nrows))
-	fmt.Println("after new table")
 
 	return rr, nil
 }
