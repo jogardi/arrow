@@ -297,7 +297,7 @@ type resultPair struct {
 
 // ReadRowGroups is for generating an array.Table from the file but filtering to only read the requested
 // columns and row groups rather than the entire file which ReadTable does.
-func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []int) (arrow.Table, error) {
+func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []int) (ret arrow.Table, reterr error) {
 	if err := fr.checkRowGroups(rowGroups); err != nil {
 		return nil, err
 	}
@@ -330,6 +330,15 @@ func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []in
 	wg.Add(np) // fan-out to np readers
 	for i := 0; i < np; i++ {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					fmt.Println("recovered from panic")
+					//return nil, fmt.Errorf("panic: %v", r)
+					reterr = fmt.Errorf("panic: %v", r)
+					ret = nil
+				}
+			}()
+
 			defer wg.Done()
 			for {
 				select {
