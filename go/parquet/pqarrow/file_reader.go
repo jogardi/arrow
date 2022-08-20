@@ -303,6 +303,7 @@ func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []in
 			fmt.Println("recovered from panic")
 			reterr = fmt.Errorf("panic: %v", r)
 			ret = nil
+
 		}
 	}()
 
