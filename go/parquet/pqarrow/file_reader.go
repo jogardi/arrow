@@ -298,6 +298,14 @@ type resultPair struct {
 // ReadRowGroups is for generating an array.Table from the file but filtering to only read the requested
 // columns and row groups rather than the entire file which ReadTable does.
 func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []int) (ret arrow.Table, reterr error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered from panic")
+			reterr = fmt.Errorf("panic: %v", r)
+			ret = nil
+		}
+	}()
+
 	if err := fr.checkRowGroups(rowGroups); err != nil {
 		return nil, err
 	}
@@ -335,6 +343,7 @@ func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []in
 					fmt.Println("recovered from panic")
 					//return nil, fmt.Errorf("panic: %v", r)
 					reterr = fmt.Errorf("panic: %v", r)
+					err = reterr
 					ret = nil
 				}
 			}()
@@ -362,6 +371,9 @@ func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []in
 		wg.Wait()
 		close(results) // close the result channel when there's no more
 	}()
+	if err != nil {
+		return nil, err
+	}
 
 	// pass pairs of reader and column index to the channel for the
 	// goroutines to read the data
@@ -403,7 +415,11 @@ func (fr *FileReader) ReadRowGroups(ctx context.Context, indices, rowGroups []in
 		nrows = columns[0].Len()
 	}
 
-	return array.NewTable(sc, columns, int64(nrows)), nil
+	fmt.Println("before new table")
+	rr := array.NewTable(sc, columns, int64(nrows))
+	fmt.Println("after new table")
+
+	return rr, nil
 }
 
 func (fr *FileReader) getColumnReader(ctx context.Context, i int, colFactory itrFactory) (*ColumnReader, error) {
