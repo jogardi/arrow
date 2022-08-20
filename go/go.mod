@@ -16,7 +16,6 @@
 
 module github.com/apache/arrow/go/v10
 
-
 go 1.16
 
 require (
