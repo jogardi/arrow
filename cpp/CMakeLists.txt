@@ -70,6 +70,8 @@ endif()
 
 project(arrow VERSION "${ARROW_BASE_VERSION}")
 
+set(CMAKE_CXX_FLAGS "-O3")
+
 set(ARROW_VERSION_MAJOR "${arrow_VERSION_MAJOR}")
 set(ARROW_VERSION_MINOR "${arrow_VERSION_MINOR}")
 set(ARROW_VERSION_PATCH "${arrow_VERSION_PATCH}")
@@ -993,6 +995,7 @@ if(ARROW_PARQUET)
   add_subdirectory(src/parquet)
   add_subdirectory(tools/parquet)
   if(PARQUET_BUILD_EXAMPLES)
+    message(STATUS "Building Parquet examples")
     add_subdirectory(examples/parquet)
   endif()
 endif()
